@@ -1,66 +1,55 @@
-# アデランス AI音声スタジオ
+# アデランス - AI音声スタジオ (ADERANS AI VOICE STUDIO)
 
-開発者用`ai_voice_studio.ipynb`をGoogle Colabで実行する社内配布プロジェクトです。Windowsで音声処理本体を直接実行するものではありません。
+Google Colaboratory環境上で手軽に高精度な音声合成（TTS）を利用できる、Webインターフェース付きのAI音声スタジオです。ベースモデルとして `Irodori-TTS` を採用し、直感的なブラウザ操作で多彩な音声生成やボイスクローンを行うことができます。
 
-- 開発者用: `ai_voice_studio.ipynb`
-- 配布用: `アデランス_AI音声スタジオ_v1_0.ipynb`（`v`は小文字）
-- GitHub: `https://github.com/ad-developer-robous/ai-voice-studio`
+---
 
-配布ノートブックは固定のブートストラップです。最初のセルがGitHubの`main`にある開発者ノートブックを取得して実行するため、開発者がpushした後の再実行で修正が反映されます。
+## 🌟 主な特徴
 
-## 社内ユーザー
+* **2つの音声生成モード**
+  * **ボイスデザイン**: テキストのキャラクター記述やプロンプトから、理想の声をゼロから作成します。
+  * **ボイスクローン**: 参照用の音声ファイル（`.wav`）をアップロードし、その声質を忠実に再現します。
+* **50種類の豊富なボイスプリセット**: 男性・女性・中性・その他、シチュエーションやキャラクターに合わせた多彩なプリセットを即座に適用可能です。
+* **細やかな無音・間隔調整**: 原稿テキスト内に `[br1]` や `[br1.5]` のようなタグを挿入することで、不自然な発声を防ぎ、指定秒数のデジタル無音を自由に挟むことができます。
+* **品質・ステップ数調整**: サンプリングステップ数（40〜400）を変更し、処理速度と音声品質のバランスを調整可能です。
+* **安全な公開アクセス**: Cloudflare Tunnelを利用し、URLとセキュリティーキーによって安全に外部ブラウザからアクセスできます[cite: 1, 2]。
 
-初回はGitとPowerShellが使えるWindows端末で、次を実行します。
+---
 
-```powershell
-git clone https://github.com/ad-developer-robous/ai-voice-studio.git "$HOME\AI-Voice-Studio"
-cd "$HOME\AI-Voice-Studio"
-.\Start-AIVoiceStudio.bat
-```
+## 📂 ノートブックの構成（2つのipynbについて）
 
-以後はcloneしたフォルダーで`.\Start-AIVoiceStudio.bat`を実行してください。スクリプトは安全な更新を試みてからGoogle Colabの配布ノートブックをブラウザーで開きます。ColabでGPUランタイム（推奨T4）を接続し、最初のコードセルを実行してください。直接起動する場合は`.\scripts\Start-AIVoiceStudio.ps1`を使います。
+本プロジェクトには、用途の異なる2つのGoogle Colab用ノートブックが用意されています。
 
-このランチャーが開くURLは次の形式です。ローカルノートブックをColabへアップロードするのではありません。
+* **`アデランス_AI音声スタジオ_v1_0.ipynb`（ランチャー用ノートブック）**
+  * ユーザーがGoogle Colabで実際に起動するための軽量なショートカット用ノートブックです。数行のシンプルなコードでGitHub上の本体コードを自動取得・実行します。
+* **`ai_voice_studio.ipynb`（マスター本体ノートブック）**
+  * アプリのすべての実装（環境構築、FastAPIバックエンド、HTML/UI、Cloudflare Tunnelによる公開設定など）が詰まった本体コードです[cite: 1, 2]。
 
-`https://colab.research.google.com/github/ad-developer-robous/ai-voice-studio/blob/main/アデランス_AI音声スタジオ_v1_0.ipynb`
+---
 
-ローカル変更がある場合、fetch失敗、またはfast-forwardできない場合、更新ヘルパーは警告して現在のcloneを変更せず起動を続けます。stash、reset、強制checkout、上書きは行いません。最新状態を使う場合は別のcloneを作成してください。Colabで取得できない場合はネットワークを確認して配布ノートブックを開き直してください。
+## 🚀 使い方（Google Colabでの実行方法）
 
-## 開発者の公開手順
+1. 起動用のGoogle Colaboratoryノートブック（`アデランス_AI音声スタジオ_v1_0.ipynb`）を開きます。
+2. セルの実行ボタン（▶️）を押下します。
+3. セットアップ、モデルのロード、サーバーの起動が自動で行われます（初回は約2〜3分程度、GPU環境推奨）。
+4. 処理が完了すると、コンソール上に**セキュリティキー付きのアクセス用URL**が表示されます。
+5. 表示されたURLをクリックすると、ブラウザ上で「AI音声スタジオ」の操作画面が起動します[cite: 1, 2]。
 
-1. `ai_voice_studio.ipynb`だけを編集し、必要ならColabで確認します。
-2. `scripts\Sync-DistributionNotebook.ps1`を実行します。これは開発者ノートブックの実行結果と実行回数を削除します。
-3. 両ノートブックとスクリプトの差分を確認します。
-4. 必要なファイルをcommitして`main`へpushします。自動commit・pushはしません。
+---
 
-```powershell
-.\scripts\Sync-DistributionNotebook.ps1
-git diff --check
-git status --short --untracked-files=all
-```
+## 🎛️ 画面の主な機能
 
-配布ノートブックは固定ブートストラップなので、開発者ノートブックを配布ファイルへコピーしません。同期スクリプトは配布ファイルがブートストラップでない場合に停止します。
+* **ボイスプリセット一覧**: カテゴリごとに絞り込みができ、クリックするだけでサンプル原稿とキャラクター記述が自動入力されます。
+* **音声品質設定**: 標準では200ステップに設定されています。環境や好みに応じてステップ数を変更可能です。
+* **プレビューとダウンロード**: 生成された音声はブラウザ内で試聴でき、Wavファイルとしてダウンロードが可能です[cite: 1]。
 
-## セキュリティと信頼範囲
+---
 
-最新修正を自動反映するため、配布ノートブックは固定コミットではなくGitHub`main`のRaw URLからコードを取得して実行します。これは意図した信頼モデルです。`main`へのpush内容とGitHubアカウントを配布対象コードとしてレビューしてください。固定コミット運用へ変更する場合は、URLと公開手順を同時に変更します。
+## ⚠️ 運用上の注意点・トラブルシューティング
 
-アプリは一時的なCloudflare Tunnelを作り、ランダムなURLトークンでアクセスを制限します。トンネルは公開インターネットから到達可能で、URLを知る人がアクセスを試せます。URL・トークンを共有・保存・Gitへ追加せず、組織が承認した音声データだけを扱ってください。現在のアプリは接続元を限定するCORS設定ではないため、この公開範囲を受け入れられない場合は公開前に認証・CORS方針を見直してください。
-
-## Colab依存関係
-
-`fastapi`、`uvicorn`、`jinja2`、`python-multipart`、`https://github.com/Aratako/Irodori-TTS.git`とその`requirements.txt`、Hugging Faceの`Aratako/Irodori-TTS-v4.1-Small`、Linux用Cloudflare Tunnelを使用します。直接インストールするパッケージは`requirements-colab.txt`にも記載しています。これはWindows用ではありません。Google Colab、Linux、外部ネットワーク、GPUが必要です。
-
-## 生成物と検証
-
-トンネルURL・トークン、音声、ログ、モデルキャッシュ、生成された`app.py`・`templates`、APIキー、個人情報はcommitしないでください。公開前に差分を確認してください。
-
-```powershell
-python -c "import json, pathlib; [json.loads(p.read_text(encoding='utf-8')) for p in pathlib.Path('.').glob('*.ipynb')]"
-[System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path '.\scripts\Update-AIVoiceStudio.ps1'), [ref]$null, [ref]$null)
-[System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path '.\scripts\Sync-DistributionNotebook.ps1'), [ref]$null, [ref]$null)
-[System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path '.\scripts\Start-AIVoiceStudio.ps1'), [ref]$null, [ref]$null)
-git diff --check
-```
-
-Google Colab/GPU実行、push後のRaw配信、Windowsのダブルクリック表示は未確認事項です。公開前に実環境で確認してください。
+* **サイトにアクセスできなくなった場合**:
+  * ノートブック上部のメニュー ＞ 「ランタイム」 ＞ 「セッションを再起動してすべて実行する」を選択して再実行してください。
+* **しばらく利用しない場合（リソースの解放）**:
+  * 無料枠のGPUには利用時間制限（1日約4時間の上限など）があるため、利用を終了する際は「ランタイム」 ＞ 「ランタイムを接続解除して削除」を行ってください。
+* **CPUモードでの動作について**:
+  * GPUが利用できない環境では自動的にCPUモードで動作しますが、音声生成に時間がかかるため長文の際はご注意ください[cite: 1, 2]。
